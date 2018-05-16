@@ -42,4 +42,4 @@ You can also see the other agents that it is competing against here too!
 
 ## Support
 
-Please contact support@embod.ai or join the [gitter community](https://gitter.im/embod-ai/Lobby)
+Please contact support@embod.ai or join the [discord community](https://discordapp.com/invite/RPqqKr4)

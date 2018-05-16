@@ -1,2 +1,2 @@
-embod_client==0.0.5
+embod_client==0.0.7
 numpy==1.14.1
