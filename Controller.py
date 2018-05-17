@@ -55,5 +55,4 @@ class Controller:
         self._counter += 1
 
     def start(self):
-        print("You can now view your agent running at https://app.embod.ai/andromeda/view")
         self.eb.start()
