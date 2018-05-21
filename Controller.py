@@ -27,10 +27,10 @@ class Controller:
             max_food_sensor, food_direction = self._get_sensor_direction(food_sensor)
             max_poison_sensor, poison_direction = self._get_sensor_direction(poison_sensor)
 
-            # No sideways motion
+            # Always move forwards at the same speed
             xForce = 0.1
 
-            # Always move forwards at the same speed
+            # No sideways motion
             yForce = 0.0
 
             # Turn towards the food
