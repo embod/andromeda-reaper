@@ -1,28 +1,30 @@
 import numpy as np
-import embod_client as eb
+import embod_client as client
 from state_stack import StateStack
+from uuid import UUID
 
 class Controller:
 
-    def __init__(self, apikey, agent_id):
+    def __init__(self, api_key, agent_ids, host):
 
-        self.states = StateStack()
+        self._states = StateStack()
         self._counter = 1
 
-        self.eb = eb.AsyncClient(apikey, agent_id, self._state_callback)
+        self._agent_ids = [UUID(agent_id) for agent_id in agent_ids]
 
-    def _get_sensor_direction(self, sensor):
-        argmax = np.argmax(sensor)
-        return sensor[argmax], (argmax - 5)
+        self._client = client.AsyncClient(api_key, self._connect_callback, self._state_callback, host)
 
-    async def _state_callback(self, state, reward, error):
+    async def _connect_callback(self):
+        for agent_id in self._agent_ids:
+            await self._client._add_agent(agent_id)
+
+    async def _state_callback(self, agent_id, state, reward, error):
 
         if error is not None:
             print(error[0].decode('UTF-8'))
-            self.eb.stop()
 
         if not self._counter % 5:
-            mbot_sensor, food_sensor, poison_sensor, xvelocity, yvelocity, zvelocity = self.states.split_means()
+            mbot_sensor, food_sensor, poison_sensor, xvelocity, yvelocity, zvelocity = self._states.split_means()
 
             max_food_sensor, food_direction = self._get_sensor_direction(food_sensor)
             max_poison_sensor, poison_direction = self._get_sensor_direction(poison_sensor)
@@ -42,7 +44,7 @@ class Controller:
 
             action = [xForce, yForce, zRotationForce]
 
-            await self.eb.send_agent_action(action)
+            await self._client.send_agent_action(agent_id, action)
 
         if reward is not None:
             if reward > 0:
@@ -51,8 +53,12 @@ class Controller:
             if reward < 0:
                 print("poison consumed :(")
 
-        self.states.add_state(state)
+        self._states.add_state(state)
         self._counter += 1
 
+    def _get_sensor_direction(self, sensor):
+        argmax = np.argmax(sensor)
+        return sensor[argmax], (argmax - 5)
+
     def start(self):
-        self.eb.start()
+        self._client.start()
